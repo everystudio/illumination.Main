@@ -20,10 +20,6 @@ public class LightRotation : MonoBehaviourEx {
 	private List<DataColorParam> color_list = new List<DataColorParam>();
 	private int index;
 
-	public float useWidth;
-	public float tateWidth;
-	public float yokoWidth;
-
 	public Color fadeTo;
 	public Color fadeTarget;
 
@@ -37,30 +33,11 @@ public class LightRotation : MonoBehaviourEx {
 		Debug.LogError(rtScreen.localScale);
 		Debug.LogError(rtScreen.gameObject.transform.localScale);
 		*/
-		if (DeviceOrientationDetector.Instance.orientation == DeviceOrientationDetector.ORIENTATION.YOKO)
-		{
-			yokoWidth = rtScreen.sizeDelta.x / rtScreen.localScale.x * 1.5f;
-			tateWidth = rtScreen.sizeDelta.y / rtScreen.localScale.y * 1.5f;
-			useWidth = yokoWidth;
-		}
-		else
-		{
-			tateWidth = rtScreen.sizeDelta.x / rtScreen.localScale.x * 1.5f;
-			yokoWidth = rtScreen.sizeDelta.y / rtScreen.localScale.y * 1.5f;
-			useWidth = tateWidth;
-		}
+		imgSub.transform.localScale = Vector3.zero;
 		DeviceOrientationDetector.Instance.OnChangeOrientation.AddListener(OnChangeOrientation);
 	}
 	private void OnChangeOrientation(DeviceOrientationDetector.ORIENTATION _orientaiton)
 	{
-		if (_orientaiton == DeviceOrientationDetector.ORIENTATION.YOKO)
-		{
-			useWidth = yokoWidth;
-		}
-		else
-		{
-			useWidth = tateWidth;
-		}
 	}
 
 	public void LightStop()
@@ -88,9 +65,7 @@ public class LightRotation : MonoBehaviourEx {
 		//CheckRectTransform(img.rectTransform, "img");
 		//CheckRectTransform(imgSub.rectTransform, "imgSub");
 		//Debug.LogError(rtScreen.sizeDelta.x);
-
-		imgSub.rectTransform.offsetMin = new Vector2(useWidth, 0.0f);
-		imgSub.rectTransform.sizeDelta = new Vector2(useWidth*-1.0f, 0.0f);
+		imgSub.transform.localScale = Vector3.zero;
 
 
 		color_list.Clear();
@@ -101,6 +76,7 @@ public class LightRotation : MonoBehaviourEx {
 				color_list.Add(param);
 			}
 		}
+		color_list.Sort((a, b) => a.index - b.index);
 
 		if (_pattern.pattern.Equals("Gradation"))
 		{
@@ -214,9 +190,7 @@ public class LightRotation : MonoBehaviourEx {
 	public void OnSlideWaitCompleteChangeColor(int _index)
 	{
 		img.color = GetColor(color_list[_index]);
-		imgSub.rectTransform.offsetMin = new Vector2(useWidth, 0.0f);
-		imgSub.rectTransform.sizeDelta = new Vector2(useWidth * -1.0f, 0.0f);
-
+		imgSub.transform.localScale = Vector3.zero;
 
 		iTween.ValueTo(gameObject,
 			iTween.Hash(
@@ -238,8 +212,8 @@ public class LightRotation : MonoBehaviourEx {
 		iTween.ValueTo(gameObject,
 			iTween.Hash(
 				"time", 6.0f,
-				"from", 1.0f,
-				"to", 0.0f,
+				"from", 0.0f,
+				"to", 1.0f,
 				"onupdate", "ChangeColorSlide",
 				"oncomplete", "OnSlideWaitCompleteChangeColor",
 				"oncompleteparams", index
@@ -248,8 +222,7 @@ public class LightRotation : MonoBehaviourEx {
 	}
 	public void ChangeColorSlide( float _fvalue)
 	{
-		imgSub.rectTransform.offsetMin = new Vector2(useWidth * _fvalue, 0.0f);
-		imgSub.rectTransform.sizeDelta = new Vector2(useWidth * _fvalue * -1.0f, 0.0f);
+		imgSub.transform.localScale = new Vector3(_fvalue, 1.0f, 1.0f);
 	}
 	public void dummy(float _fValue)
 	{
